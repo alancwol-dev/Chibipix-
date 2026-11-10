@@ -3,7 +3,7 @@
 An iOS app that turns a photo of a person or animal into a **Japanese chibi character** or a **pixel-art sprite**.
 
 - **On-device mode** (default, free, private): Apple Vision lifts the subject off the background, finds the face and eyes (people) or head joints (cats and dogs), and Core Image does the styling. Nothing is uploaded.
-- **ChatGPT mode** (optional): sends the photo to ChatGPT's image generator (Images 2.6, models `gpt-image-2.6-flare` / `gpt-image-2.6-sunburst`) with a chibi or pixel-art prompt, using your OpenAI API key. For pixel art, ChatGPT's drawing is then snapped to a true pixel grid and palette on the device.
+- **ChatGPT mode** (optional, free): opens Apple's Image Playground with the **ChatGPT** style and your photo as the reference. It uses the ChatGPT account set up on the iPhone (the free plan works), so there's no API key and no cost. For pixel art, ChatGPT's drawing is then snapped to a true pixel grid and palette on the device.
 
 ## Requirements
 
@@ -45,17 +45,15 @@ If Xcode ever complains about the project file, you can regenerate it with [Xcod
 | Remove background / Sprite outline | Cuts out the subject and adds a 1-pixel outline |
 | Retro dithering | 4×4 Bayer ordered dithering |
 
-## ChatGPT mode setup
+## ChatGPT mode setup (free)
 
-1. Create an API key at <https://platform.openai.com/api-keys>. A ChatGPT Plus or Pro subscription doesn't include API access; API usage is billed separately.
-2. In the app, tap the gear icon, paste the key (it's stored in the Keychain), and choose:
-   - **Model**: *Flare* (`gpt-image-2.6-flare`, fast) or *Sunburst* (`gpt-image-2.6-sunburst`, keeps more detail and likeness), or type in another model ID.
-   - **Quality**: low, medium or high.
-3. Switch the engine to **ChatGPT** and tap **Generate with ChatGPT**.
+Needs **iOS 26 or later** on an Apple Intelligence iPhone or iPad (iPhone 15 Pro or newer, or an M-series iPad). The app must be built with Xcode 26 or later.
 
-The request goes to `POST https://api.openai.com/v1/images/edits`, with the photo sent as `image[]` (see `AI/ChatGPTImages.swift`). The prompts are in `ChatGPTImages.prompt(for:kind:)`.
+1. In the Settings app, turn on **Apple Intelligence**.
+2. Go to **Settings › Apple Intelligence & Siri › ChatGPT** and turn on the extension. It works without an account, or you can sign in to a free ChatGPT account for higher limits.
+3. In ChibiPix, switch the engine to **ChatGPT (free)** and tap **Generate with ChatGPT**. Image Playground opens with your photo and a chibi or pixel-art prompt. Check that the **ChatGPT** style is selected, then pick the result you like.
 
-> **Shipping to the App Store?** Don't ship a client-side key. Put a small server in front of the API and point `ChatGPTImages` at it.
+How it works: `Views/ChatGPTSection.swift` presents `imagePlaygroundSheet(...)` with `sourceImage` set to your photo, and `imagePlaygroundGenerationStyle(.externalProvider, ...)` so it opens on the ChatGPT style. The prompts are in `StudioModel.playgroundPrompt`. Image generation is free, but ChatGPT's daily image limits apply.
 
 ## Building an .ipa
 
@@ -92,8 +90,7 @@ ChibiPix/
 ├── ChibiPixApp.swift
 ├── Models/       StyleOptions.swift (options, palettes, backgrounds) · StudioModel.swift (state & rendering pipeline)
 ├── Processing/   SubjectAnalyzer.swift (Vision) · ChibiRenderer.swift · PixelArtRenderer.swift · ImageUtils.swift
-├── AI/           ChatGPTImages.swift · KeychainStore.swift
-├── Views/        ContentView.swift · OptionsPanel.swift · SettingsView.swift · CameraPicker.swift
+├── Views/        ContentView.swift · OptionsPanel.swift · ChatGPTSection.swift · SettingsView.swift · CameraPicker.swift
 └── Assets.xcassets
 ```
 

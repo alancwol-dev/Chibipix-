@@ -21,7 +21,6 @@ final class StudioModel {
     private(set) var statusMessage: String?
     private(set) var detectedKind: SubjectKind?
     private(set) var hasSegmentation = true
-    private(set) var hasAPIKey = KeychainStore.hasKey
     var showingOriginal = false
     var errorMessage: String?
     var toast: String?
@@ -51,10 +50,6 @@ final class StudioModel {
         showingOriginal = false
         setResult(nil)
         scheduleRender(debounce: false)
-    }
-
-    func refreshKeyState() {
-        hasAPIKey = KeychainStore.hasKey
     }
 
     // MARK: - Rendering
@@ -147,37 +142,34 @@ final class StudioModel {
         resultPNG = ui.pngData()
     }
 
-    // MARK: - AI
+    // MARK: - ChatGPT (via Image Playground)
 
-    func generateAI() {
-        guard let original else { return }
-        guard let key = KeychainStore.load(), !key.isEmpty else {
-            errorMessage = "Add your OpenAI API key in Settings to use ChatGPT image generation."
+    /// What we ask ChatGPT for. Image Playground pairs this with the user's photo.
+    var playgroundPrompt: String {
+        let subject: String
+        switch analysis?.kind ?? .unknown {
+        case .person: subject = "this person"
+        case .animal: subject = "this animal"
+        case .unknown: subject = "this subject"
+        }
+        switch style {
+        case .chibi:
+            return "Cute Japanese chibi anime version of \(subject): oversized head, tiny rounded body, big sparkling eyes, blush, bold clean line art, pastel colours, white sticker outline, full body"
+        case .pixel:
+            return "16-bit retro pixel art game sprite of \(subject): full body, chunky pixels, limited palette, dark outline, plain white background"
+        }
+    }
+
+    /// Called when the Image Playground sheet returns a picture.
+    func receivePlaygroundImage(at url: URL) {
+        let style = style
+        guard let data = try? Data(contentsOf: url), let image = UIImage(data: data),
+              let cg = ImageUtils.normalized(image, maxDimension: 1024).cgImage else {
+            errorMessage = "Couldn't read the image ChatGPT made."
             return
         }
-        task?.cancel()
-        isProcessing = true
-        statusMessage = "ChatGPT is drawing… this can take up to a minute"
-        let style = style
-        let kind = analysis?.kind ?? .unknown
-        let stylizer = ChatGPTImages.fromSettings(apiKey: key)
-
-        task = Task { [weak self] in
-            do {
-                let image = try await stylizer.stylize(image: original, style: style, kind: kind)
-                guard let self, !Task.isCancelled else { return }
-                guard let cg = ImageUtils.normalized(image, maxDimension: 1024).cgImage else {
-                    throw ChatGPTImages.ChatGPTError.noImage
-                }
-                self.aiBase[style] = (cg, nil)
-                self.scheduleRender(debounce: false)
-            } catch {
-                guard let self, !Task.isCancelled else { return }
-                self.isProcessing = false
-                self.statusMessage = nil
-                self.errorMessage = error.localizedDescription
-            }
-        }
+        aiBase[style] = (cg, nil)
+        scheduleRender(debounce: false)
     }
 
     // MARK: - Export

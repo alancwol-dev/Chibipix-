@@ -12,7 +12,7 @@ struct OptionsPanel: View {
             .pickerStyle(.segmented)
 
             if model.engine == .ai {
-                aiSection
+                ChatGPTSection(model: model)
             } else if !model.hasSegmentation {
                 Label("Background removal isn't available here (it needs a real iPhone or iPad), so the whole photo is used.",
                       systemImage: "exclamationmark.triangle")
@@ -30,31 +30,6 @@ struct OptionsPanel: View {
         .padding(18)
         .background(.background, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         .shadow(color: .black.opacity(0.05), radius: 10, y: 4)
-    }
-
-    // MARK: AI
-
-    private var aiSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(model.style == .chibi
-                 ? "ChatGPT image generation (Images 2.6) redraws your photo as a hand-drawn chibi illustration."
-                 : "ChatGPT image generation draws a sprite, then ChibiPix snaps it to a true pixel grid using the settings below.")
-                .font(.subheadline)
-            Label("Your photo is sent to OpenAI and billed to your API key.", systemImage: "lock.shield")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            Button {
-                if model.hasAPIKey { model.generateAI() } else { showSettings = true }
-            } label: {
-                Label(model.hasAPIKey ? (model.needsAIGeneration ? "Generate with ChatGPT" : "Regenerate") : "Add API key",
-                      systemImage: model.hasAPIKey ? "wand.and.stars" : "key.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .tint(.purple)
-            .disabled(model.isProcessing)
-        }
     }
 
     // MARK: Chibi

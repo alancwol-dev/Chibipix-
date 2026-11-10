@@ -23,7 +23,7 @@ enum ArtStyle: String, CaseIterable, Identifiable, Hashable {
 
 enum Engine: String, CaseIterable, Identifiable {
     case onDevice = "On-device"
-    case ai = "ChatGPT"
+    case ai = "ChatGPT (free)"
     var id: String { rawValue }
 }
 

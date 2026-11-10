@@ -52,7 +52,7 @@ struct ContentView: View {
                 CameraPicker { model.setImage($0) }
                     .ignoresSafeArea()
             }
-            .sheet(isPresented: $showSettings, onDismiss: { model.refreshKeyState() }) {
+            .sheet(isPresented: $showSettings) {
                 SettingsView()
             }
             .alert("Oops", isPresented: Binding(
