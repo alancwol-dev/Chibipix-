@@ -1,11 +1,12 @@
-# Builds an unsigned ChibiPix.ipa on a GitHub-hosted Mac.
-# Push this project to a GitHub repo, open Actions → "Build IPA" → Run workflow,
-# then download ChibiPix-ipa from the run's Artifacts.
+# Builds an unsigned ChibiPix.ipa on a GitHub-hosted Mac and publishes it as a release.
+# Latest build: https://github.com/<owner>/<repo>/releases/latest/download/ChibiPix.ipa
 name: Build IPA
 on:
   workflow_dispatch:
   push:
     branches: [main]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: macos-latest
@@ -21,3 +22,12 @@ jobs:
         with:
           name: ChibiPix-ipa
           path: build/ChibiPix.ipa
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="build-${{ github.run_number }}"
+          gh release create "$TAG" build/ChibiPix.ipa \
+            --title "ChibiPix build ${{ github.run_number }}" \
+            --notes "Unsigned IPA from ${GITHUB_SHA::7}. Sign and install with Sideloadly or AltStore." \
+            --latest
