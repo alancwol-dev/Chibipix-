@@ -1,0 +1,21 @@
+# Builds an unsigned ChibiPix.ipa on a GitHub-hosted Mac.
+# Push this project to a GitHub repo, open Actions → "Build IPA" → Run workflow,
+# then download ChibiPix-ipa from the run's Artifacts.
+name: Build IPA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)"
+      - name: Build unsigned IPA
+        run: ./scripts/build_ipa.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ChibiPix-ipa
+          path: build/ChibiPix.ipa

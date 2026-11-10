@@ -1,0 +1,24 @@
+# Optional: regenerate the Xcode project with XcodeGen (brew install xcodegen && xcodegen)
+name: ChibiPix
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  ChibiPix:
+    type: application
+    platform: iOS
+    sources: [ChibiPix]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.ChibiPix
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: ChibiPix
+        INFOPLIST_KEY_NSCameraUsageDescription: ChibiPix uses the camera so you can snap a photo of a person or pet to stylise.
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: ChibiPix saves your chibi and pixel-art creations to your photo library.
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
